@@ -1,0 +1,10 @@
+linters:
+  enable-all: true
+  disable:
+    # Disable deprecated linters.
+    - exportloopref
+    - gomnd
+    - execinquery
+    # Disable impractical linters.
+    - depguard
+    - exhaustruct

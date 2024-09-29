@@ -1,0 +1,12 @@
+[Unit]
+Description=LTEC
+
+[Service]
+ExecStart=/usr/bin/ltec $APN
+Restart=always
+User=root
+Group=root
+Environment=PATH=/usr/bin;LOG_FORMAT=console
+
+[Install]
+WantedBy=multi-user.target
