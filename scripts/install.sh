@@ -39,6 +39,9 @@ main() {
     arch="arm64"
   fi
 
+  print_info "Stopping existing ltec service ..."
+  systemctl stop ltec.service || true
+
   print_info "Downloading and installing ltec binary ..."
   curl -sSL "https://github.com/$REPO/releases/latest/download/ltec-linux-${arch}" -o /usr/bin/ltec
   chmod +x /usr/bin/ltec
