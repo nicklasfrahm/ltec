@@ -13,12 +13,15 @@ import (
 
 var version = "dev"
 
-const reconciliationInterval = 1 * time.Minute
+const (
+	reconciliationInterval = 1 * time.Minute
+	requiredArgCount       = 2
+)
 
 func main() {
 	logger := logging.NewLogger()
 
-	if len(os.Args) < 2 {
+	if len(os.Args) < requiredArgCount {
 		logger.Error("Missing access point name argument")
 		logger.Sugar().Fatalf("Usage: %s <access-point-name>", os.Args[0])
 	}
@@ -44,10 +47,9 @@ func reconcile(logger *zap.Logger, apn string) error {
 	}
 
 	for _, modem := range modems {
-		status, err := modem.GetStatus(context.Background())
-
 		modemLogger := logger.With(zap.Int64("modem", modem.Index))
 
+		status, err := modem.GetStatus(context.Background())
 		if err != nil {
 			modemLogger.Error("Failed to get modem status", zap.Error(err))
 
@@ -58,6 +60,7 @@ func reconcile(logger *zap.Logger, apn string) error {
 
 		if len(status.Generic.Bearers) == 0 {
 			modemLogger.Info("Connecting modem", zap.String("apn", apn))
+
 			if err := modem.SimpleConnect(context.Background(), apn); err != nil {
 				modemLogger.Warn("Failed to connect modem", zap.Error(err))
 
@@ -74,48 +77,62 @@ func reconcile(logger *zap.Logger, apn string) error {
 		}
 
 		for _, bearerDBUSPath := range status.Generic.Bearers {
-			bearer, err := modem.GetBearer(context.Background(), bearerDBUSPath)
-			if err != nil {
-				modemLogger.Warn("Failed to get bearer status", zap.String("bearer", bearerDBUSPath), zap.Error(err))
+			if err := reconcileBearer(modemLogger, modem, bearerDBUSPath); err != nil {
+				modemLogger.Error("Failed to reconcile bearer", zap.Error(err), zap.String("bearer", bearerDBUSPath))
 
 				continue
 			}
 
-			modemLogger.Info("Successfully queried bearer status", zap.String("bearer", bearer.DBusPath))
+			// Implement connectivity test.
 
-			if !bearer.Status.Connected {
-				modemLogger.Info("Connecting bearer", zap.String("bearer", bearer.DBusPath))
+			modemLogger.Info("Successfully reconciled modem")
 
-				if err := bearer.Connect(context.Background()); err != nil {
-					modemLogger.Warn("Failed to connect bearer", zap.String("bearer", bearer.DBusPath), zap.Error(err))
+			return nil
+		}
+	}
 
-					continue
-				}
+	return nil
+}
 
-				// Ensure that the status is updated.
-				bearer, err = modem.GetBearer(context.Background(), bearer.DBusPath)
-				if err != nil {
-					modemLogger.Warn("Failed to get bearer status", zap.String("bearer", bearer.DBusPath), zap.Error(err))
+// reconcileBearer ensures that the bearer is connected and working.
+func reconcileBearer(logger *zap.Logger, modem *modemmanager.Modem, bearerDBUSPath string) error {
+	bearer, err := modem.GetBearer(context.Background(), bearerDBUSPath)
+	if err != nil {
+		logger.Error("Failed to get bearer status", zap.Error(err), zap.String("bearer", bearerDBUSPath))
 
-					continue
-				}
-			}
+		return fmt.Errorf("failed to get bearer status: %w", err)
+	}
 
-			if err := bearer.ConfigureInterface(context.Background()); err != nil {
-				modemLogger.Warn("Failed to configure interface", zap.String("bearer", bearer.DBusPath), zap.Error(err))
+	logger.Info("Successfully queried bearer status", zap.String("bearer", bearer.DBusPath))
 
-				continue
-			}
+	if !bearer.Status.Connected {
+		logger.Info("Connecting bearer", zap.String("bearer", bearer.DBusPath))
 
-			modemLogger.Info("Successfully configured interface", zap.String("bearer", bearer.DBusPath), zap.String("interface", bearer.Status.Interface))
+		if err := bearer.Connect(context.Background()); err != nil {
+			logger.Warn("Failed to connect bearer", zap.String("bearer", bearer.DBusPath), zap.Error(err))
+
+			return fmt.Errorf("failed to connect bearer: %w", err)
 		}
 
-		// TODO: Test connectivity.
+		// Ensure that the status is updated.
+		bearer, err = modem.GetBearer(context.Background(), bearer.DBusPath)
+		if err != nil {
+			logger.Warn("Failed to get bearer status", zap.String("bearer", bearer.DBusPath), zap.Error(err))
 
-		modemLogger.Info("Successfully reconciled modem")
-
-		return nil
+			return fmt.Errorf("failed to get bearer status: %w", err)
+		}
 	}
+
+	if err := bearer.ConfigureInterface(context.Background()); err != nil {
+		logger.Warn("Failed to configure interface", zap.String("bearer", bearer.DBusPath), zap.Error(err))
+
+		return fmt.Errorf("failed to configure interface: %w", err)
+	}
+
+	logger.Info("Successfully configured interface",
+		zap.String("bearer", bearer.DBusPath),
+		zap.String("interface", bearer.Status.Interface),
+	)
 
 	return nil
 }

@@ -55,7 +55,11 @@ type Bearer struct {
 
 // Connect connects the bearer.
 func (b *Bearer) Connect(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, "mmcli", fmt.Sprintf("--bearer=%s", b.DBusPath), "--connect")
+	//nolint:gosec // We are not passing user input.
+	cmd := exec.CommandContext(ctx, "mmcli",
+		"--bearer="+b.DBusPath,
+		"--connect",
+	)
 
 	if _, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("failed to connect bearer: %w", err)

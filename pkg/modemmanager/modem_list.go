@@ -3,6 +3,7 @@ package modemmanager
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"time"
@@ -11,7 +12,7 @@ import (
 const defaultTimeout = 100 * time.Millisecond
 
 // ErrNoModems is returned when no modems are found.
-var ErrNoModems = fmt.Errorf("no modems detected")
+var ErrNoModems = errors.New("no modems detected")
 
 // ModemListResponse represents a modem list response.
 type ModemListResponse struct {
@@ -25,6 +26,7 @@ func ListModems(ctx context.Context) ([]*Modem, error) {
 	defer cancel()
 
 	cmd := exec.CommandContext(timeoutContext, "mmcli", "--list-modems", "--output-json")
+
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list modems: %w", err)
@@ -40,6 +42,7 @@ func ListModems(ctx context.Context) ([]*Modem, error) {
 	}
 
 	modems := make([]*Modem, 0, len(resp.ModemList))
+
 	for _, path := range resp.ModemList {
 		modem, err := NewModem(path)
 		if err != nil {

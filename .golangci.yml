@@ -8,3 +8,10 @@ linters:
     # Disable impractical linters.
     - depguard
     - exhaustruct
+
+linters-settings:
+  tagliatelle:
+    case:
+      rules:
+        # We can't influence this as these are provided by ModemManager.
+        json: kebab

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os/exec"
+	"strconv"
 )
 
 // Iface represents an interface.
@@ -23,7 +24,7 @@ type Iface struct {
 
 // NewIface creates a new interface.
 func NewIface(name string, addressPrefix string, gateway string, dns []string, mtu int) (*Iface, error) {
-	ip, addressPrefixNet, err := net.ParseCIDR(addressPrefix)
+	address, addressPrefixNet, err := net.ParseCIDR(addressPrefix)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse address prefix: %w", err)
 	}
@@ -34,6 +35,7 @@ func NewIface(name string, addressPrefix string, gateway string, dns []string, m
 	}
 
 	dnsIPs := make([]net.IP, 0, len(dns))
+
 	for _, dnsStr := range dns {
 		dnsIP := net.ParseIP(dnsStr)
 		if dnsIP == nil {
@@ -46,7 +48,7 @@ func NewIface(name string, addressPrefix string, gateway string, dns []string, m
 	return &Iface{
 		Name: name,
 		AddressPrefix: net.IPNet{
-			IP:   ip,
+			IP:   address,
 			Mask: addressPrefixNet.Mask,
 		},
 		Gateway: gatewayIP,
@@ -80,23 +82,40 @@ func (i *Iface) Reconcile(ctx context.Context) error {
 		}
 	}
 
+	// Configure the interface.
+	if err := i.configure(ctx, iface); err != nil {
+		return fmt.Errorf("failed to configure interface: %w", err)
+	}
+
+	return nil
+}
+
+// configure configures the interface.
+func (i *Iface) configure(ctx context.Context, iface *net.Interface) error {
+	// Check if the interface is up.
+	if iface.Flags&net.FlagUp == 0 {
+		// Set the link up.
+		//nolint:gosec // We only allow the bearer to provide limited information.
+		if err := exec.CommandContext(ctx, "ip", "link", "set", "dev", i.Name, "up").Run(); err != nil {
+			return fmt.Errorf("failed to set interface up: %w", err)
+		}
+	}
+
 	// Set the IP address.
+	//nolint:gosec // We only allow the bearer to provide limited information.
 	if err := exec.CommandContext(ctx, "ip", "addr", "add", i.AddressPrefix.String(), "dev", i.Name).Run(); err != nil {
 		return fmt.Errorf("failed to set IP address: %w", err)
 	}
 
-	// Set the gateway.
-	if err := exec.CommandContext(ctx, "ip", "route", "add", "default", "via", i.Gateway.String()).Run(); err != nil {
-		return fmt.Errorf("failed to set gateway: %w", err)
-	}
-
 	// Set the MTU.
-	if err := exec.CommandContext(ctx, "ip", "link", "set", "dev", i.Name, "mtu", fmt.Sprint(i.MTU)).Run(); err != nil {
+	//nolint:gosec // We only allow the bearer to provide limited information.
+	if err := exec.CommandContext(ctx, "ip", "link", "set", "dev", i.Name, "mtu", strconv.Itoa(i.MTU)).Run(); err != nil {
 		return fmt.Errorf("failed to set MTU: %w", err)
 	}
 
 	// Add route for the interface.
-	if err := exec.CommandContext(ctx, "ip", "route", "add", i.AddressPrefix.String(), "dev", i.Name).Run(); err != nil {
+	//nolint:gosec // We only allow the bearer to provide limited information.
+	if err := exec.CommandContext(ctx, "ip", "route", "add", "default", "dev", i.Name, "metric", "200").Run(); err != nil {
 		return fmt.Errorf("failed to add route: %w", err)
 	}
 

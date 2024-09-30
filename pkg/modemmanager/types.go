@@ -42,7 +42,7 @@ func (i *Int) MarshalJSON() ([]byte, error) {
 func (i *Int) UnmarshalJSON(data []byte) error {
 	value, err := strconv.Atoi(strings.Trim(string(data), `"`))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal integer: %w", err)
 	}
 
 	*i = Int(value)

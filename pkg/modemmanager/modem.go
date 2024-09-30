@@ -18,13 +18,15 @@ type Modem struct {
 	Path  string
 }
 
+const minModemSegments = 2
+
 // ErrInvalidPath is returned when the path is invalid.
 var ErrInvalidPath = errors.New("invalid path")
 
 // NewModem creates a new modem.
 func NewModem(path string) (*Modem, error) {
 	segments := strings.Split(path, "/")
-	if len(segments) < 2 {
+	if len(segments) < minModemSegments {
 		return nil, fmt.Errorf("failed to create modem: %w: %s", ErrInvalidPath, path)
 	}
 
@@ -43,9 +45,10 @@ func NewModem(path string) (*Modem, error) {
 
 // GetStatus gets the status of the modem.
 func (m *Modem) GetStatus(ctx context.Context) (*ModemStatus, error) {
+	//nolint:gosec // We are not passing user input.
 	cmd := exec.CommandContext(ctx, "mmcli", fmt.Sprintf("--modem=%d", m.Index), "--output-json")
 
-	// TODO: Provide more context for errors.
+	// How can we provide more context for errors, e.g. stderr?
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to query modem status: %w", err)
@@ -61,12 +64,13 @@ func (m *Modem) GetStatus(ctx context.Context) (*ModemStatus, error) {
 
 // SimpleConnect connects the modem to the given APN.
 func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
+	//nolint:gosec // This is the only way to pass the APN.
 	cmd := exec.CommandContext(ctx, "mmcli",
 		fmt.Sprintf("--modem=%d", m.Index),
 		fmt.Sprintf("--simple-connect='apn=%s,ip-type=ipv4v6", apn),
 	)
 
-	// TODO: Provide more context for errors.
+	// How can we provide more context for errors, e.g. stderr?
 	if _, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("failed to connect modem: %w", err)
 	}
@@ -76,7 +80,12 @@ func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
 
 // GetBearer gets the specified bearer of the modem.
 func (m *Modem) GetBearer(ctx context.Context, dbusPath string) (*Bearer, error) {
-	cmd := exec.CommandContext(ctx, "mmcli", fmt.Sprintf("--modem=%d", m.Index), fmt.Sprintf("--bearer=%s", dbusPath), "--output-json")
+	//nolint:gosec // We are not passing user input.
+	cmd := exec.CommandContext(ctx, "mmcli",
+		fmt.Sprintf("--modem=%d", m.Index),
+		"--bearer="+dbusPath,
+		"--output-json",
+	)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
