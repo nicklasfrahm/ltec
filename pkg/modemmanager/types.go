@@ -1,7 +1,9 @@
 package modemmanager
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Boolean represents a boolean value with custom JSON marshalling.
@@ -33,12 +35,12 @@ type Int int
 
 // MarshalJSON marshals the integer value.
 func (i *Int) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Itoa(int(*i))), nil
+	return []byte(fmt.Sprintf(`"%d"`, *i)), nil
 }
 
 // UnmarshalJSON unmarshals the integer value.
 func (i *Int) UnmarshalJSON(data []byte) error {
-	value, err := strconv.Atoi(string(data))
+	value, err := strconv.Atoi(strings.Trim(string(data), `"`))
 	if err != nil {
 		return err
 	}
