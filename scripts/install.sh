@@ -29,8 +29,10 @@ main() {
     exit 1
   fi
 
-  print_info "Ensuring ModemManager is installed"
-  apt-get update && apt-get install -y modemmanager
+  if dpkg -l modemmanager >/dev/null 2>&1; then
+    print_info "Installing ModemManager ..."
+    apt-get update && apt-get install -y modemmanager
+  fi
 
   arch="amd64"
   if [ "$(uname -m)" == "aarch64" ]; then
