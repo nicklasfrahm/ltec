@@ -11,6 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var version = "dev"
+
 const reconciliationInterval = 1 * time.Minute
 
 func main() {
@@ -22,7 +24,7 @@ func main() {
 	}
 
 	apn := os.Args[1]
-	logger.Info("Starting LTE controller", zap.String("apn", apn))
+	logger.Info("Starting LTE controller", zap.String("apn", apn), zap.String("version", version))
 
 	if err := reconcile(logger, apn); err != nil {
 		logger.Error("Failed to reconcile", zap.Error(err), zap.String("trigger", "startup"))
