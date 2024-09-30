@@ -68,8 +68,16 @@ jobs:
         with:
           go-version: stable
 
+      - name: Create release
+        uses: docker://ghcr.io/codfish/semantic-release-action:v3
+        id: semantic
+        with:
+          dry-run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build
-        run: ARCH=${{ matrix.arch }} make build
+        run: ARCH=${{ matrix.arch }} VERSION=${{ steps.semantic.outputs.git-tag }} make build
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
