@@ -1,0 +1,13 @@
+# Reference: https://semantic-release.gitbook.io/semantic-release/usage/configuration#branches
+branches:
+  # Default distribution channel.
+  - name: "main"
+
+# Reference: https://semantic-release.gitbook.io/semantic-release/usage/configuration#repositoryurl
+repositoryUrl: https://github.com/nicklasfrahm-dev/appkit.git
+
+# Reference: https://semantic-release.gitbook.io/semantic-release/usage/configuration#plugins
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - ["@semantic-release/github", {"assets": [{"path": "release/*"}]}]

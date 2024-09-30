@@ -4,6 +4,14 @@ LOG_FORMAT	?= console
 GOFLAGS			?= -ldflags "-X main.version=$(VERSION)"
 APN					?= "bredband.oister.dk"
 
+# Canonicalized names for target architecture.
+ARCH				?= $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+	override ARCH=amd64
+else ifeq ($(ARCH),aarch64)
+	override ARCH=arm64
+endif
+
 define HELP_HEADER
 Usage:	make <target>
 
@@ -21,10 +29,10 @@ help: ## List all targets.
 run: ## Run the application.
 	LOG_FORMAT=$(LOG_FORMAT) go run $(GOFLAGS) cmd/$(APP)/main.go $(APN)
 
-build: bin/$(APP) ## Build the application binary.
+build: bin/$(APP)-linux-$(ARCH) ## Build the application binary.
 
-bin/$(APP): cmd/$(APP)/main.go $(shell find . -name '*.go')
-	CGO_ENABLED=0 go build $(GOFLAGS) -o $@ $<
+bin/$(APP)-linux-$(ARCH): cmd/$(APP)/main.go $(shell find . -name '*.go')
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build $(GOFLAGS) -o $@ $<
 
 .PHONY: test
 test: ## Run tests.

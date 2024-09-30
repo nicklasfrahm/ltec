@@ -2,6 +2,14 @@
 
 A simple controller to manage an LTE WAN connection on a software router.
 
+## Installation
+
+Currently, we only support a deployment using `systemd`.
+
+```shell
+curl -sSL https://raw.githubusercontent.com/nicklasfrahm/ltec/main/scripts/install.sh | sudo bash -s -- <access-point-name>
+```
+
 ## Modem manager command reference
 
 ```shell

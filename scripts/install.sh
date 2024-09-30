@@ -22,8 +22,13 @@ main() {
   apt-get update
   apt-get install -y modemmanager
 
+  arch="amd64"
+  if [ "$(uname -m)" == "aarch64" ]; then
+    arch="arm64"
+  fi
+
   # Install binary.
-  curl -sSL "https://github.com/$repo/releases/download/latest/ltec" -o /usr/bin/ltec
+  curl -sSL "https://github.com/$repo/releases/download/latest/ltec-linux-${arch}" -o /usr/bin/ltec
 
   # Create service file.
   export APN="$APN"
