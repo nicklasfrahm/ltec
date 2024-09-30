@@ -3,42 +3,55 @@
 
 set -eou pipefail
 
-repo="nicklasfrahm/ltec"
+REPO="nicklasfrahm/ltec"
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+RESET='\033[0m'
+
+print_error() {
+  echo -e "${RED}err:${RESET} $1"
+}
+
+print_info() {
+  echo -e "${GREEN}inf:${RESET} $1"
+}
 
 main() {
   APN="$1"
   if [ -z "$APN" ]; then
-    echo "error: missing required argument: <access_point_name>"
+    print_error "missing required argument: <access_point_name>"
     exit 1
   fi
 
   # Check if script is running as root.
   if [ "$EUID" -ne 0 ]; then
-    echo "error: script must be run as root or using sudo"
+    print_error "script must be run as root or using sudo"
     exit 1
   fi
 
-  # Install dependencies.
-  apt-get update
-  apt-get install -y modemmanager
+  print_info "Ensuring ModemManager is installed"
+  apt-get update && apt-get install -y modemmanager
 
   arch="amd64"
   if [ "$(uname -m)" == "aarch64" ]; then
     arch="arm64"
   fi
 
-  # Install binary.
-  curl -sSL "https://github.com/$repo/releases/download/latest/ltec-linux-${arch}" -o /usr/bin/ltec
+  print_info "Downloading and installing ltec binary ..."
+  curl -sSL "https://github.com/$REPO/releases/download/latest/ltec-linux-${arch}" -o /usr/bin/ltec
+  chmod +x /usr/bin/ltec
 
   # Create service file.
+  print_info "Creating systemd service ..."
   export APN="$APN"
-  curl -sSL https://raw.githubusercontent.com/$repo/main/configs/systemd/ltec.service | envsubst >/etc/systemd/system/ltec.service
+  curl -sSL https://raw.githubusercontent.com/$REPO/main/configs/systemd/ltec.service | envsubst >/etc/systemd/system/ltec.service
 
-  # Reload systemd.
+  print_info "Reloading systemd daemons ..."
   systemctl daemon-reload
 
-  # Enable and start service.
+  print_info "Enabling and starting ltec service ..."
   systemctl enable --now ltec.service
+  systemctl restart ltec.service
 }
 
 # We want to pass all arguments to main.
