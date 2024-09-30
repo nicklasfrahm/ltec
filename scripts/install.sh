@@ -38,7 +38,7 @@ main() {
   fi
 
   print_info "Downloading and installing ltec binary ..."
-  curl -sSL "https://github.com/$REPO/releases/download/latest/ltec-linux-${arch}" -o /usr/bin/ltec
+  curl -sSL "https://github.com/$REPO/releases/latest/download/ltec-linux-${arch}" -o /usr/bin/ltec
   chmod +x /usr/bin/ltec
 
   # Create service file.
