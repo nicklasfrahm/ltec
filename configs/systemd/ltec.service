@@ -10,4 +10,4 @@ Environment="PATH=/usr/bin"
 Environment="LOG_FORMAT=console"
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=systemd-network-wait-online.service
