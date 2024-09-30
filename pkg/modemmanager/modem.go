@@ -73,3 +73,20 @@ func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
 
 	return nil
 }
+
+// GetBearer gets the specified bearer of the modem.
+func (m *Modem) GetBearer(ctx context.Context, dbusPath string) (*Bearer, error) {
+	cmd := exec.CommandContext(ctx, "mmcli", fmt.Sprintf("--modem=%d", m.Index), fmt.Sprintf("--bearer=%s", dbusPath), "--output-json")
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query bearer: %w", err)
+	}
+
+	var resp BearerResponse
+	if err := json.Unmarshal(output, &resp); err != nil {
+		return nil, fmt.Errorf("failed to decode bearer: %w", err)
+	}
+
+	return &resp.Bearer, nil
+}
