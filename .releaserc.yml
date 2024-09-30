@@ -4,7 +4,7 @@ branches:
   - name: "main"
 
 # Reference: https://semantic-release.gitbook.io/semantic-release/usage/configuration#repositoryurl
-repositoryUrl: https://github.com/nicklasfrahm-dev/appkit.git
+repositoryUrl: https://github.com/nicklasfrahm/ltec.git
 
 # Reference: https://semantic-release.gitbook.io/semantic-release/usage/configuration#plugins
 plugins:
