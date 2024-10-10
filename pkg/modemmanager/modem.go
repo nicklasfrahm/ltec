@@ -71,7 +71,7 @@ func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
 	//nolint:gosec // This is the only way to pass the APN.
 	cmd := exec.CommandContext(ctx, "mmcli",
 		fmt.Sprintf("--modem=%d", m.Index),
-		fmt.Sprintf("--simple-connect='apn=%s,ip-type=ipv4v6", apn),
+		fmt.Sprintf("--simple-connect='apn=%s,ip-type=ipv4v6'", apn),
 	)
 
 	if output, err := cmd.CombinedOutput(); err != nil {
