@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"os/exec"
 	"time"
+
+	"github.com/nicklasfrahm-dev/appkit/logging"
+	"go.uber.org/zap"
 )
 
 const defaultTimeout = 100 * time.Millisecond
@@ -27,13 +30,15 @@ func ListModems(ctx context.Context) ([]*Modem, error) {
 
 	cmd := exec.CommandContext(timeoutContext, "mmcli", "--list-modems", "--output-json")
 
-	out, err := cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+
 		return nil, fmt.Errorf("failed to list modems: %w", err)
 	}
 
 	var resp ModemListResponse
-	if err := json.Unmarshal(out, &resp); err != nil {
+	if err := json.Unmarshal(output, &resp); err != nil {
 		return nil, fmt.Errorf("failed to decode modem list: %w", err)
 	}
 

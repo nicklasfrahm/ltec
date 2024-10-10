@@ -8,6 +8,9 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/nicklasfrahm-dev/appkit/logging"
+	"go.uber.org/zap"
 )
 
 //
@@ -48,9 +51,10 @@ func (m *Modem) GetStatus(ctx context.Context) (*ModemStatus, error) {
 	//nolint:gosec // We are not passing user input.
 	cmd := exec.CommandContext(ctx, "mmcli", fmt.Sprintf("--modem=%d", m.Index), "--output-json")
 
-	// How can we provide more context for errors, e.g. stderr?
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+
 		return nil, fmt.Errorf("failed to query modem status: %w", err)
 	}
 
@@ -70,8 +74,9 @@ func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
 		fmt.Sprintf("--simple-connect='apn=%s,ip-type=ipv4v6", apn),
 	)
 
-	// How can we provide more context for errors, e.g. stderr?
-	if _, err := cmd.CombinedOutput(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+
 		return fmt.Errorf("failed to connect modem: %w", err)
 	}
 
@@ -89,6 +94,8 @@ func (m *Modem) GetBearer(ctx context.Context, dbusPath string) (*Bearer, error)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+
 		return nil, fmt.Errorf("failed to query bearer: %w", err)
 	}
 

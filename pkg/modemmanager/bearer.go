@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/nicklasfrahm-dev/appkit/logging"
 	"github.com/nicklasfrahm/ltec/pkg/ip"
+	"go.uber.org/zap"
 )
 
 // BearerResponse represents a bearer response.
@@ -61,7 +63,9 @@ func (b *Bearer) Connect(ctx context.Context) error {
 		"--connect",
 	)
 
-	if _, err := cmd.CombinedOutput(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+
 		return fmt.Errorf("failed to connect bearer: %w", err)
 	}
 

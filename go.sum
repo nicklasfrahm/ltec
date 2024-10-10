@@ -2,6 +2,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/nicklasfrahm-dev/appkit v0.0.2 h1:D844bnrmBdjthTCVRyZyj6fQxOT8f5Sa7jeUt4wNFa4=
 github.com/nicklasfrahm-dev/appkit v0.0.2/go.mod h1:SLJLahK9mvpnkLdV2PIvEtin6vYJwUIMB6TYxkqxOg0=
+github.com/nicklasfrahm-dev/appkit v0.1.1 h1:eh/9JVbiy86Bm1kHOzPBMfKHILs10iRZ917CxIE2g6M=
+github.com/nicklasfrahm-dev/appkit v0.1.1/go.mod h1:ZB2RjIQi6XQr0BL6arRo3CgVnSuoaVgTiaiZXilLioY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=

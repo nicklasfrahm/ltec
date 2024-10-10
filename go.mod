@@ -3,7 +3,7 @@ module github.com/nicklasfrahm/ltec
 go 1.23.1
 
 require (
-	github.com/nicklasfrahm-dev/appkit v0.0.2
+	github.com/nicklasfrahm-dev/appkit v0.1.1
 	go.uber.org/zap v1.27.0
 )
 
