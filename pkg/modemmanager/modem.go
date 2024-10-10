@@ -53,7 +53,7 @@ func (m *Modem) GetStatus(ctx context.Context) (*ModemStatus, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", strings.TrimSpace(string(output))))
 
 		return nil, fmt.Errorf("failed to query modem status: %w", err)
 	}
@@ -71,11 +71,11 @@ func (m *Modem) SimpleConnect(ctx context.Context, apn string) error {
 	//nolint:gosec // This is the only way to pass the APN.
 	cmd := exec.CommandContext(ctx, "mmcli",
 		fmt.Sprintf("--modem=%d", m.Index),
-		fmt.Sprintf("--simple-connect='apn=%s,ip-type=ipv4v6'", apn),
+		fmt.Sprintf("--simple-connect=apn=%s,ip-type=ipv4v6", apn),
 	)
 
 	if output, err := cmd.CombinedOutput(); err != nil {
-		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", strings.TrimSpace(string(output))))
 
 		return fmt.Errorf("failed to connect modem: %w", err)
 	}
@@ -94,7 +94,7 @@ func (m *Modem) GetBearer(ctx context.Context, dbusPath string) (*Bearer, error)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", strings.TrimSpace(string(output))))
 
 		return nil, fmt.Errorf("failed to query bearer: %w", err)
 	}

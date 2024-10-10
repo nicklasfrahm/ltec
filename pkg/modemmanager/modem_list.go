@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/nicklasfrahm-dev/appkit/logging"
@@ -32,7 +33,7 @@ func ListModems(ctx context.Context) ([]*Modem, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", strings.TrimSpace(string(output))))
 
 		return nil, fmt.Errorf("failed to list modems: %w", err)
 	}

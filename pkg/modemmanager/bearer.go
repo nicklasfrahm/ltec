@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/nicklasfrahm-dev/appkit/logging"
 	"github.com/nicklasfrahm/ltec/pkg/ip"
@@ -64,7 +65,7 @@ func (b *Bearer) Connect(ctx context.Context) error {
 	)
 
 	if output, err := cmd.CombinedOutput(); err != nil {
-		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", string(output)))
+		logging.FromContext(ctx).Error("Failed to run command", zap.String("output", strings.TrimSpace(string(output))))
 
 		return fmt.Errorf("failed to connect bearer: %w", err)
 	}
