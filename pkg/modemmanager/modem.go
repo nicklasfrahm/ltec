@@ -13,8 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-//
-
 // Modem represents a modem.
 type Modem struct {
 	Index int64

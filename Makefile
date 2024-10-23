@@ -1,7 +1,7 @@
-APP					:= ltec
+APP					:= wwand
 VERSION			?= $(shell git describe --tags --always --dirty)
 LOG_FORMAT	?= console
-GOFLAGS			?= -ldflags "-X main.version=$(VERSION)"
+GOFLAGS			?= -ldflags '-X main.version=$(VERSION)'
 APN					?= "bredband.oister.dk"
 
 # Canonicalized names for target architecture.
@@ -32,7 +32,7 @@ run: ## Run the application.
 build: bin/$(APP)-linux-$(ARCH) ## Build the application binary.
 
 bin/$(APP)-linux-$(ARCH): cmd/$(APP)/main.go $(shell find . -name '*.go')
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build $(GOFLAGS) -o $@ $<
+	CGO_ENABLED=1 GOOS=linux GOARCH=$(ARCH) go build $(GOFLAGS) -o $@ $<
 
 .PHONY: test
 test: ## Run tests.
